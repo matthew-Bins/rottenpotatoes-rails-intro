@@ -12,24 +12,47 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie.getratings
+    #ratings = params[:ratings]
+    redirect = false
     
-    if params[:ratings] != nil
-      @selected_ratings = params[:ratings]
+    #check for ratings session
+    if params[:ratings]
+      session[:ratings] = params[:ratings]
+    elsif session[:ratings]
+      redirect = true
+    end
+    
+    #check for sort session
+    if params[:sort]
+      session[:sort] = params[:sort]
+    elsif session[:sort]
+      redirect = true
+    end
+    
+    @sort = session[:sort]
+    
+    #redirect if need to
+    if redirect
+      #flash.keep
+      flash[:notice] = "your in redirect"
+      redirect_to movies_path(:ratings => session[:ratings], :sort => session[:sort])
+    end
+    
+    #do action
+    if params[:ratings] and params[:sort]
+      @selected_ratings = session[:ratings]
+      @movies = Movie.where(:rating => @selected_ratings.keys).order(params[:sort])
+    elsif params[:sort]
+      @movies = Movie.order(params[:sort])
+    elsif params[:ratings]
+      @selected_ratings = session[:ratings]
       @movies = Movie.where(:rating => @selected_ratings.keys)
     else
       @movies = Movie.all
       @selected_ratings = Hash.new
       @all_ratings.each do |x| @selected_ratings[x] = 1 end
     end
-    
-    
-    #sorts movies based on clicked on header
-    if params[:sort]
-      @sort = params[:sort]
-      @movies = Movie.order(params[:sort])
-    else
-      @sort = nil
-    end
+      
     
   end
 
