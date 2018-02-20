@@ -11,9 +11,19 @@ class MoviesController < ApplicationController
   end
 
   def index
+    @all_ratings = Movie.getratings
     
-    @movies = Movie.all
+    if params[:ratings] != nil
+      @selected_ratings = params[:ratings]
+      @movies = Movie.where(:rating => @selected_ratings.keys)
+    else
+      @movies = Movie.all
+      @selected_ratings = Hash.new
+      @all_ratings.each do |x| @selected_ratings[x] = 1 end
+    end
     
+    
+    #sorts movies based on clicked on header
     if params[:sort]
       @sort = params[:sort]
       @movies = Movie.order(params[:sort])
