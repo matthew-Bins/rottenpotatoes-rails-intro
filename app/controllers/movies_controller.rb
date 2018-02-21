@@ -11,14 +11,11 @@ class MoviesController < ApplicationController
   end
 
   def index
-    logger.debug "*****Top of index"
     @all_ratings = Movie.getratings
-    #ratings = params[:ratings]
     redirect = false
     
     #check for ratings session
     if params[:ratings]
-      logger.debug "*******in params rating: #{params[:ratings]}"
       session[:ratings] = params[:ratings]
       @selected_ratings = session[:ratings]
     elsif session[:ratings]
@@ -31,7 +28,6 @@ class MoviesController < ApplicationController
     
     #check for sort session
     if params[:sort]
-      logger.debug "*******in params sort: #{params[:sort]}"
       session[:sort] = params[:sort]
     elsif session[:sort]
       redirect = true
@@ -41,29 +37,23 @@ class MoviesController < ApplicationController
     
     #redirect if need to
     if redirect
-      #flash.keep
-      logger.debug "*****In redirect"
-      redirect_to movies_path(:ratings => session[:ratings], :sort => session[:sort])
+      flash.keep
+      redirect_to movies_path(:ratings => session[:ratings], :sort => session[:sort]) and return
     end
     
     #do action
     if params[:ratings] and params[:sort]
-      logger.debug "*****In ratings and sort"
       @movies = Movie.where(:rating => @selected_ratings.keys).order(params[:sort])
     elsif params[:sort]
-      logger.debug "*****Just in sort"
       @movies = Movie.order(params[:sort])
       
     elsif params[:ratings]
-      logger.debug "*****Just in ratings"
       @selected_ratings = session[:ratings]
       @movies = Movie.where(:rating => @selected_ratings.keys)
     else
-      logger.debug "*****first start-up to page"
       @movies = Movie.all
     end
-      
-    logger.debug "******** end of index"
+    
   end
 
   def new
